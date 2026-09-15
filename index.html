@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <title>Morning Primer | Protocol</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&family=Inter:wght@400;600;800&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+  </style>
+</head>
+<body class="bg-black text-zinc-100 min-h-screen flex flex-col items-center p-4 selection:bg-zinc-800 selection:text-white">
+
+  <main class="w-full max-w-md my-4 space-y-5">
+    
+    <!-- Top Bar: Minimalist Terminal Header -->
+    <header class="border-b border-zinc-900 pb-3 flex justify-between items-baseline">
+      <div>
+        <h1 class="text-xs font-bold uppercase tracking-[0.25em] text-zinc-400">PROTOCOL</h1>
+        <div class="text-xl font-extrabold tracking-tight text-white">MORNING PRIMER</div>
+      </div>
+      <div id="todayDate" class="mono text-xs text-zinc-500">2026-09-16</div>
+    </header>
+
+    <!-- Stoic/Discipline Anchor Quote -->
+    <div id="quoteBox" class="p-3.5 bg-zinc-950 border border-zinc-900 rounded-xl text-xs text-zinc-400 italic">
+      "Disiplin bermula saat kau buka mata: takluki tubuh sebelum dunia mula menuntut."
+    </div>
+
+    <!-- Core Metrics: Consecutive Days Streak & Progress Ratio -->
+    <div class="grid grid-cols-2 gap-3">
+      <div class="bg-zinc-950 border border-zinc-900 rounded-2xl p-4">
+        <span class="text-[10px] mono uppercase tracking-wider text-zinc-500 block">Consecutive Streak</span>
+        <div class="flex items-baseline gap-1 mt-1">
+          <span id="streakDays" class="text-4xl font-extrabold tracking-tight text-emerald-400 mono">0</span>
+          <span class="text-xs text-zinc-500">HARI</span>
+        </div>
+      </div>
+      <div class="bg-zinc-950 border border-zinc-900 rounded-2xl p-4">
+        <span class="text-[10px] mono uppercase tracking-wider text-zinc-500 block">Total Primed</span>
+        <div class="flex items-baseline gap-1 mt-1">
+          <span id="totalPrimed" class="text-4xl font-extrabold tracking-tight text-zinc-200 mono">0</span>
+          <span class="text-xs text-zinc-500">SESI</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Progress Discipline Bar (Sasaran Fasa: 30 Hari Tanpa Putus) -->
+    <div class="bg-zinc-950 border border-zinc-900 rounded-2xl p-4 space-y-2">
+      <div class="flex justify-between text-xs mono">
+        <span class="text-zinc-500 uppercase tracking-wider">Phase Target (30 Hari)</span>
+        <span id="progressPercent" class="text-emerald-400 font-bold">0%</span>
+      </div>
+      <div class="w-full h-2 bg-zinc-900 rounded-full overflow-hidden">
+        <div id="progressBar" class="h-full bg-emerald-500 transition-all duration-700" style="width: 0%;"></div>
+      </div>
+    </div>
+
+    <!-- Action Section -->
+    <section class="bg-zinc-950 border border-zinc-900 rounded-2xl p-5 space-y-4">
+      <div class="flex justify-between items-center">
+        <span class="text-xs font-semibold uppercase tracking-wider text-zinc-400">Focus Rutin Pagi Ini:</span>
+        <span id="statusIndicator" class="text-[10px] mono font-bold px-2 py-0.5 rounded bg-zinc-900 text-zinc-500 border border-zinc-800">UNRESOLVED</span>
+      </div>
+
+      <!-- Pilihan Bahagian Fokus Regangan -->
+      <div class="grid grid-cols-3 gap-2 text-xs mono">
+        <button type="button" onclick="selectFocus(this, 'Spine & Back')" class="focus-btn p-2 rounded-lg border border-zinc-800 bg-black text-zinc-400 hover:text-white transition">Spine/Back</button>
+        <button type="button" onclick="selectFocus(this, 'Hips & Legs')" class="focus-btn p-2 rounded-lg border border-zinc-800 bg-black text-zinc-400 hover:text-white transition">Hips/Legs</button>
+        <button type="button" onclick="selectFocus(this, 'Full Mobility')" class="focus-btn p-2 rounded-lg border border-zinc-800 bg-black text-zinc-400 hover:text-white transition">Full Body</button>
+      </div>
+
+      <input type="text" id="mentalNote" placeholder="Catatan fizikal ringkas (cth: hamstring ketat, dekompresi selesai)..."
+        class="w-full bg-black border border-zinc-800 rounded-xl p-3 text-xs text-zinc-200 focus:outline-none focus:border-zinc-500 placeholder:text-zinc-700">
+
+      <button id="commitBtn" onclick="commitMorningPrimer()"
+        class="w-full py-4 bg-zinc-100 hover:bg-white active:scale-[0.98] transition font-extrabold text-black rounded-xl text-xs uppercase tracking-widest mono">
+        Commit: Stretching Selesai
+      </button>
+    </section>
+
+    <!-- Execution Log History -->
+    <section class="space-y-2">
+      <div class="flex justify-between items-center text-xs uppercase tracking-wider mono text-zinc-500">
+        <span>Execution History</span>
+        <button onclick="loadTracker()" class="hover:text-zinc-300">Sync 🔄</button>
+      </div>
+      <div id="logsHistory" class="space-y-2 max-h-64 overflow-y-auto pr-1 text-xs mono">
+        <p class="text-zinc-700 text-center py-4">Memuat rekod...</p>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    const SUPABASE_URL = "https://jrbbiqchqahyjhkxqmgr.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_5NR1DcL0YZ1Z5416-kX_2w_f8la6ycO";
+    const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    let selectedFocus = "Full Mobility";
+
+    // Format tarikh tempatan YYYY-MM-DD
+    function getTodayString() {
+      const now = new Date();
+      const yyyy = now.getFullYear();
+      const mm = String(now.getMonth() + 1).padStart(2, '0');
+      const dd = String(now.getDate()).padStart(2, '0');
+      return `${yyyy}-${mm}-${dd}`;
+    }
+
+    const todayStr = getTodayString();
+    document.getElementById('todayDate').innerText = todayStr;
+
+    function selectFocus(el, val) {
+      document.querySelectorAll('.focus-btn').forEach(btn => {
+        btn.classList.remove('border-emerald-500', 'text-emerald-400', 'bg-zinc-900');
+        btn.classList.add('border-zinc-800', 'text-zinc-400', 'bg-black');
+      });
+      el.classList.add('border-emerald-500', 'text-emerald-400', 'bg-zinc-900');
+      el.classList.remove('border-zinc-800', 'text-zinc-400', 'bg-black');
+      selectedFocus = val;
+    }
+
+    async function loadTracker() {
+      const { data, error } = await db
+        .from('morning_stretching')
+        .select('*')
+        .order('stretch_date', { ascending: false });
+
+      if (error) {
+        console.error(error);
+        return;
+      }
+
+      const logs = data || [];
+      const total = logs.length;
+      document.getElementById('totalPrimed').innerText = total;
+
+      // Hitung streak berturut-turut
+      let streak = 0;
+      let checkDate = new Date();
+      // Set to midnight
+      checkDate.setHours(0, 0, 0, 0);
+
+      // Semak sama ada hari ini dah buat atau belum
+      const isTodayDone = logs.some(l => l.stretch_date === todayStr);
+
+      const commitBtn = document.getElementById('commitBtn');
+      const statusInd = document.getElementById('statusIndicator');
+
+      if (isTodayDone) {
+        statusInd.innerText = "COMPLETED";
+        statusInd.className = "text-[10px] mono font-bold px-2 py-0.5 rounded bg-emerald-950/60 text-emerald-400 border border-emerald-800";
+        commitBtn.disabled = true;
+        commitBtn.innerText = "Primer Hari Ini Selesai ✓";
+        commitBtn.className = "w-full py-4 bg-zinc-900 text-zinc-600 rounded-xl text-xs uppercase tracking-widest mono cursor-not-allowed";
+      } else {
+        statusInd.innerText = "PENDING";
+        statusInd.className = "text-[10px] mono font-bold px-2 py-0.5 rounded bg-amber-950/60 text-amber-400 border border-amber-800";
+        commitBtn.disabled = false;
+        commitBtn.innerText = "Commit: Stretching Selesai";
+        commitBtn.className = "w-full py-4 bg-zinc-100 hover:bg-white active:scale-[0.98] transition font-extrabold text-black rounded-xl text-xs uppercase tracking-widest mono";
+      }
+
+      // Hitung Streak
+      let curr = new Date();
+      if (!isTodayDone) {
+        curr.setDate(curr.getDate() - 1); // Semak dari semalam
+      }
+      
+      while (true) {
+        const yyyy = curr.getFullYear();
+        const mm = String(curr.getMonth() + 1).padStart(2, '0');
+        const dd = String(curr.getDate()).padStart(2, '0');
+        const dStr = `${yyyy}-${mm}-${dd}`;
+        
+        const exists = logs.find(l => l.stretch_date === dStr);
+        if (exists) {
+          streak++;
+          curr.setDate(curr.getDate() - 1);
+        } else {
+          break;
+        }
+      }
+
+      document.getElementById('streakDays').innerText = streak;
+
+      // Progress Bar (Fasa 30 Hari)
+      const phaseTarget = 30;
+      const pct = Math.min(Math.round((streak / phaseTarget) * 100), 100);
+      document.getElementById('progressPercent').innerText = `${pct}% (${streak}/${phaseTarget} HARI)`;
+      document.getElementById('progressBar').style.width = `${pct}%`;
+
+      // Log Sejarah
+      const logsContainer = document.getElementById('logsHistory');
+      if (logs.length === 0) {
+        logsContainer.innerHTML = `<p class="text-zinc-700 text-center py-4">Tiada rekod stretching lagi.</p>`;
+        return;
+      }
+
+      logsContainer.innerHTML = logs.map(l => `
+        <div class="flex justify-between items-center p-3 rounded-xl bg-zinc-950 border border-zinc-900">
+          <div>
+            <div class="text-zinc-200 font-semibold">${l.stretch_date} <span class="text-[10px] text-zinc-500 ml-1">[${l.intensity_focus || 'Routine'}]</span></div>
+            <div class="text-[11px] text-zinc-500 mt-0.5">${l.mental_note || 'Mobiliti selesai.'}</div>
+          </div>
+          <span class="text-emerald-400 font-bold text-xs">DONE</span>
+        </div>
+      `).join('');
+    }
+
+    async function commitMorningPrimer() {
+      const btn = document.getElementById('commitBtn');
+      const note = document.getElementById('mentalNote').value.trim();
+
+      btn.disabled = true;
+      btn.innerText = "Recording Execution...";
+
+      const { error } = await db
+        .from('morning_stretching')
+        .upsert({
+          stretch_date: todayStr,
+          completed: true,
+          intensity_focus: selectedFocus,
+          mental_note: note || 'Tubuh disiapkan untuk hari ini.'
+        }, { onConflict: 'stretch_date' });
+
+      if (error) {
+        alert("Ralat simpan: " + error.message);
+        btn.disabled = false;
+        btn.innerText = "Commit: Stretching Selesai";
+      } else {
+        document.getElementById('mentalNote').value = "";
+        await loadTracker();
+      }
+    }
+
+    loadTracker();
+  </script>
+</body>
+</html>
