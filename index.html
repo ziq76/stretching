@@ -17,21 +17,21 @@
 
   <main class="w-full max-w-md my-4 space-y-5">
     
-    <!-- Top Bar: Minimalist Terminal Header -->
+    <!-- Top Bar -->
     <header class="border-b border-zinc-900 pb-3 flex justify-between items-baseline">
       <div>
         <h1 class="text-xs font-bold uppercase tracking-[0.25em] text-zinc-400">PROTOCOL</h1>
         <div class="text-xl font-extrabold tracking-tight text-white">MORNING PRIMER</div>
       </div>
-      <div id="todayDate" class="mono text-xs text-zinc-500">2026-09-16</div>
+      <div id="todayDate" class="mono text-xs text-zinc-500">2026-09-19</div>
     </header>
 
-    <!-- Stoic/Discipline Anchor Quote -->
+    <!-- Stoic Anchor Quote -->
     <div id="quoteBox" class="p-3.5 bg-zinc-950 border border-zinc-900 rounded-xl text-xs text-zinc-400 italic">
       "Disiplin bermula saat kau buka mata: takluki tubuh sebelum dunia mula menuntut."
     </div>
 
-    <!-- Core Metrics: Consecutive Days Streak & Progress Ratio -->
+    <!-- Core Metrics -->
     <div class="grid grid-cols-2 gap-3">
       <div class="bg-zinc-950 border border-zinc-900 rounded-2xl p-4">
         <span class="text-[10px] mono uppercase tracking-wider text-zinc-500 block">Consecutive Streak</span>
@@ -49,7 +49,7 @@
       </div>
     </div>
 
-    <!-- Progress Discipline Bar (Sasaran Fasa: 30 Hari Tanpa Putus) -->
+    <!-- Progress Discipline Bar -->
     <div class="bg-zinc-950 border border-zinc-900 rounded-2xl p-4 space-y-2">
       <div class="flex justify-between text-xs mono">
         <span class="text-zinc-500 uppercase tracking-wider">Phase Target (30 Hari)</span>
@@ -63,24 +63,52 @@
     <!-- Action Section -->
     <section class="bg-zinc-950 border border-zinc-900 rounded-2xl p-5 space-y-4">
       <div class="flex justify-between items-center">
-        <span class="text-xs font-semibold uppercase tracking-wider text-zinc-400">Focus Rutin Pagi Ini:</span>
+        <span class="text-xs font-semibold uppercase tracking-wider text-zinc-400">Status Sesi Hari Ini:</span>
         <span id="statusIndicator" class="text-[10px] mono font-bold px-2 py-0.5 rounded bg-zinc-900 text-zinc-500 border border-zinc-800">UNRESOLVED</span>
       </div>
 
-      <!-- Pilihan Bahagian Fokus Regangan -->
-      <div class="grid grid-cols-3 gap-2 text-xs mono">
-        <button type="button" onclick="selectFocus(this, 'Spine & Back')" class="focus-btn p-2 rounded-lg border border-zinc-800 bg-black text-zinc-400 hover:text-white transition">Spine/Back</button>
-        <button type="button" onclick="selectFocus(this, 'Hips & Legs')" class="focus-btn p-2 rounded-lg border border-zinc-800 bg-black text-zinc-400 hover:text-white transition">Hips/Legs</button>
-        <button type="button" onclick="selectFocus(this, 'Full Mobility')" class="focus-btn p-2 rounded-lg border border-zinc-800 bg-black text-zinc-400 hover:text-white transition">Full Body</button>
+      <!-- Tab Switcher: Selesai vs Terlepas -->
+      <div class="grid grid-cols-2 gap-1 p-1 bg-black border border-zinc-900 rounded-xl text-xs mono">
+        <button id="tabDoneBtn" type="button" onclick="switchMode('done')" class="py-2 rounded-lg bg-zinc-900 text-white font-bold transition">Selesai</button>
+        <button id="tabMissedBtn" type="button" onclick="switchMode('missed')" class="py-2 rounded-lg text-zinc-500 hover:text-zinc-300 transition">Terlepas / Skip</button>
       </div>
 
-      <input type="text" id="mentalNote" placeholder="Catatan fizikal ringkas (cth: hamstring ketat, dekompresi selesai)..."
-        class="w-full bg-black border border-zinc-800 rounded-xl p-3 text-xs text-zinc-200 focus:outline-none focus:border-zinc-500 placeholder:text-zinc-700">
+      <!-- Container Mod 1: Stretching Selesai -->
+      <div id="doneModeContainer" class="space-y-4">
+        <span class="text-[11px] uppercase tracking-wider mono text-zinc-500 block">Fokus Bahagian:</span>
+        <div class="grid grid-cols-3 gap-2 text-xs mono">
+          <button type="button" onclick="selectFocus(this, 'Spine & Back')" class="focus-btn p-2 rounded-lg border border-zinc-800 bg-black text-zinc-400 hover:text-white transition">Spine/Back</button>
+          <button type="button" onclick="selectFocus(this, 'Hips & Legs')" class="focus-btn p-2 rounded-lg border border-zinc-800 bg-black text-zinc-400 hover:text-white transition">Hips/Legs</button>
+          <button type="button" onclick="selectFocus(this, 'Full Mobility')" class="focus-btn p-2 rounded-lg border border-emerald-500 bg-zinc-900 text-emerald-400 transition">Full Body</button>
+        </div>
 
-      <button id="commitBtn" onclick="commitMorningPrimer()"
-        class="w-full py-4 bg-zinc-100 hover:bg-white active:scale-[0.98] transition font-extrabold text-black rounded-xl text-xs uppercase tracking-widest mono">
-        Commit: Stretching Selesai
-      </button>
+        <input type="text" id="mentalNote" placeholder="Catatan fizikal ringkas (cth: hamstring ketat, dekompresi selesai)..."
+          class="w-full bg-black border border-zinc-800 rounded-xl p-3 text-xs text-zinc-200 focus:outline-none focus:border-zinc-500 placeholder:text-zinc-700">
+
+        <button id="commitBtn" onclick="commitEntry(true)"
+          class="w-full py-4 bg-zinc-100 hover:bg-white active:scale-[0.98] transition font-extrabold text-black rounded-xl text-xs uppercase tracking-widest mono">
+          Commit: Stretching Selesai
+        </button>
+      </div>
+
+      <!-- Container Mod 2: Terlepas / Skip -->
+      <div id="missedModeContainer" class="space-y-4 hidden">
+        <span class="text-[11px] uppercase tracking-wider mono text-zinc-500 block">Pilih Sebab Terlepas:</span>
+        <div class="grid grid-cols-2 gap-2 text-xs mono">
+          <button type="button" onclick="selectMissedReason(this, 'Terlewat Bangun')" class="missed-reason-btn p-2.5 rounded-lg border border-rose-500 bg-zinc-900 text-rose-400 transition text-left">😴 Terlewat Bangun</button>
+          <button type="button" onclick="selectMissedReason(this, 'Sakit / Kecederaan')" class="missed-reason-btn p-2.5 rounded-lg border border-zinc-800 bg-black text-zinc-400 hover:text-white transition text-left">🩹 Sakit / Cedera</button>
+          <button type="button" onclick="selectMissedReason(this, 'Kekangan Masa / Urgent')" class="missed-reason-btn p-2.5 rounded-lg border border-zinc-800 bg-black text-zinc-400 hover:text-white transition text-left">⏳ Sangat Sibuk</button>
+          <button type="button" onclick="selectMissedReason(this, 'Kurang Motivasi / Malas')" class="missed-reason-btn p-2.5 rounded-lg border border-zinc-800 bg-black text-zinc-400 hover:text-white transition text-left">🔋 Rendah Tenaga</button>
+        </div>
+
+        <input type="text" id="missedNote" placeholder="Catatan audit kendiri / faktor penghalang..."
+          class="w-full bg-black border border-zinc-800 rounded-xl p-3 text-xs text-zinc-200 focus:outline-none focus:border-zinc-500 placeholder:text-zinc-700">
+
+        <button id="commitMissedBtn" onclick="commitEntry(false)"
+          class="w-full py-4 bg-rose-950/80 hover:bg-rose-900 border border-rose-800 active:scale-[0.98] transition font-extrabold text-rose-200 rounded-xl text-xs uppercase tracking-widest mono">
+          Log Hari Terlepas (Reset Streak)
+        </button>
+      </div>
     </section>
 
     <!-- Execution Log History -->
@@ -101,9 +129,10 @@
     const SUPABASE_KEY = "sb_publishable_5NR1DcL0YZ1Z5416-kX_2w_f8la6ycO";
     const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+    let currentMode = "done";
     let selectedFocus = "Full Mobility";
+    let selectedReason = "Terlewat Bangun";
 
-    // Format tarikh tempatan YYYY-MM-DD
     function getTodayString() {
       const now = new Date();
       const yyyy = now.getFullYear();
@@ -115,6 +144,26 @@
     const todayStr = getTodayString();
     document.getElementById('todayDate').innerText = todayStr;
 
+    function switchMode(mode) {
+      currentMode = mode;
+      const doneBox = document.getElementById('doneModeContainer');
+      const missedBox = document.getElementById('missedModeContainer');
+      const doneBtn = document.getElementById('tabDoneBtn');
+      const missedBtn = document.getElementById('tabMissedBtn');
+
+      if (mode === 'done') {
+        doneBox.classList.remove('hidden');
+        missedBox.classList.add('hidden');
+        doneBtn.className = "py-2 rounded-lg bg-zinc-900 text-white font-bold transition";
+        missedBtn.className = "py-2 rounded-lg text-zinc-500 hover:text-zinc-300 transition";
+      } else {
+        doneBox.classList.add('hidden');
+        missedBox.classList.remove('hidden');
+        missedBtn.className = "py-2 rounded-lg bg-rose-950/50 text-rose-300 border border-rose-900/50 font-bold transition";
+        doneBtn.className = "py-2 rounded-lg text-zinc-500 hover:text-zinc-300 transition";
+      }
+    }
+
     function selectFocus(el, val) {
       document.querySelectorAll('.focus-btn').forEach(btn => {
         btn.classList.remove('border-emerald-500', 'text-emerald-400', 'bg-zinc-900');
@@ -123,6 +172,16 @@
       el.classList.add('border-emerald-500', 'text-emerald-400', 'bg-zinc-900');
       el.classList.remove('border-zinc-800', 'text-zinc-400', 'bg-black');
       selectedFocus = val;
+    }
+
+    function selectMissedReason(el, val) {
+      document.querySelectorAll('.missed-reason-btn').forEach(btn => {
+        btn.classList.remove('border-rose-500', 'text-rose-400', 'bg-zinc-900');
+        btn.classList.add('border-zinc-800', 'text-zinc-400', 'bg-black');
+      });
+      el.classList.add('border-rose-500', 'text-rose-400', 'bg-zinc-900');
+      el.classList.remove('border-zinc-800', 'text-zinc-400', 'bg-black');
+      selectedReason = val;
     }
 
     async function loadTracker() {
@@ -137,49 +196,57 @@
       }
 
       const logs = data || [];
-      const total = logs.length;
-      document.getElementById('totalPrimed').innerText = total;
+      const totalPrimed = logs.filter(l => l.completed === true).length;
+      document.getElementById('totalPrimed').innerText = totalPrimed;
 
-      // Hitung streak berturut-turut
-      let streak = 0;
-      let checkDate = new Date();
-      // Set to midnight
-      checkDate.setHours(0, 0, 0, 0);
-
-      // Semak sama ada hari ini dah buat atau belum
-      const isTodayDone = logs.some(l => l.stretch_date === todayStr);
-
+      const todayLog = logs.find(l => l.stretch_date === todayStr);
       const commitBtn = document.getElementById('commitBtn');
+      const commitMissedBtn = document.getElementById('commitMissedBtn');
       const statusInd = document.getElementById('statusIndicator');
 
-      if (isTodayDone) {
-        statusInd.innerText = "COMPLETED";
-        statusInd.className = "text-[10px] mono font-bold px-2 py-0.5 rounded bg-emerald-950/60 text-emerald-400 border border-emerald-800";
+      if (todayLog) {
+        if (todayLog.completed) {
+          statusInd.innerText = "COMPLETED";
+          statusInd.className = "text-[10px] mono font-bold px-2 py-0.5 rounded bg-emerald-950/60 text-emerald-400 border border-emerald-800";
+        } else {
+          statusInd.innerText = "MISSED";
+          statusInd.className = "text-[10px] mono font-bold px-2 py-0.5 rounded bg-rose-950/60 text-rose-400 border border-rose-800";
+        }
         commitBtn.disabled = true;
-        commitBtn.innerText = "Primer Hari Ini Selesai ✓";
+        commitBtn.innerText = "Rekod Hari Ini Dikunci ✓";
         commitBtn.className = "w-full py-4 bg-zinc-900 text-zinc-600 rounded-xl text-xs uppercase tracking-widest mono cursor-not-allowed";
+        
+        commitMissedBtn.disabled = true;
+        commitMissedBtn.innerText = "Hari Ini Dicatat Terlepas";
+        commitMissedBtn.className = "w-full py-4 bg-zinc-900 text-zinc-600 rounded-xl text-xs uppercase tracking-widest mono cursor-not-allowed";
       } else {
         statusInd.innerText = "PENDING";
         statusInd.className = "text-[10px] mono font-bold px-2 py-0.5 rounded bg-amber-950/60 text-amber-400 border border-amber-800";
+        
         commitBtn.disabled = false;
         commitBtn.innerText = "Commit: Stretching Selesai";
         commitBtn.className = "w-full py-4 bg-zinc-100 hover:bg-white active:scale-[0.98] transition font-extrabold text-black rounded-xl text-xs uppercase tracking-widest mono";
+
+        commitMissedBtn.disabled = false;
+        commitMissedBtn.innerText = "Log Hari Terlepas (Reset Streak)";
+        commitMissedBtn.className = "w-full py-4 bg-rose-950/80 hover:bg-rose-900 border border-rose-800 active:scale-[0.98] transition font-extrabold text-rose-200 rounded-xl text-xs uppercase tracking-widest mono";
       }
 
-      // Hitung Streak
+      // Kira streak (hanya sesi completed === true dikira)
+      let streak = 0;
       let curr = new Date();
-      if (!isTodayDone) {
-        curr.setDate(curr.getDate() - 1); // Semak dari semalam
+      if (!todayLog || !todayLog.completed) {
+        curr.setDate(curr.getDate() - 1);
       }
-      
+
       while (true) {
         const yyyy = curr.getFullYear();
         const mm = String(curr.getMonth() + 1).padStart(2, '0');
         const dd = String(curr.getDate()).padStart(2, '0');
         const dStr = `${yyyy}-${mm}-${dd}`;
-        
-        const exists = logs.find(l => l.stretch_date === dStr);
-        if (exists) {
+
+        const entry = logs.find(l => l.stretch_date === dStr);
+        if (entry && entry.completed) {
           streak++;
           curr.setDate(curr.getDate() - 1);
         } else {
@@ -189,7 +256,6 @@
 
       document.getElementById('streakDays').innerText = streak;
 
-      // Progress Bar (Fasa 30 Hari)
       const phaseTarget = 30;
       const pct = Math.min(Math.round((streak / phaseTarget) * 100), 100);
       document.getElementById('progressPercent').innerText = `${pct}% (${streak}/${phaseTarget} HARI)`;
@@ -202,39 +268,50 @@
         return;
       }
 
-      logsContainer.innerHTML = logs.map(l => `
-        <div class="flex justify-between items-center p-3 rounded-xl bg-zinc-950 border border-zinc-900">
-          <div>
-            <div class="text-zinc-200 font-semibold">${l.stretch_date} <span class="text-[10px] text-zinc-500 ml-1">[${l.intensity_focus || 'Routine'}]</span></div>
-            <div class="text-[11px] text-zinc-500 mt-0.5">${l.mental_note || 'Mobiliti selesai.'}</div>
+      logsContainer.innerHTML = logs.map(l => {
+        const isCompleted = l.completed !== false;
+        return `
+          <div class="flex justify-between items-center p-3 rounded-xl bg-zinc-950 border ${isCompleted ? 'border-zinc-900' : 'border-rose-950/60'}">
+            <div>
+              <div class="text-zinc-200 font-semibold">
+                ${l.stretch_date} 
+                <span class="text-[10px] ${isCompleted ? 'text-zinc-500' : 'text-rose-400'} ml-1">[${l.intensity_focus || 'Routine'}]</span>
+              </div>
+              <div class="text-[11px] text-zinc-500 mt-0.5">${l.mental_note || '-'}</div>
+            </div>
+            <span class="${isCompleted ? 'text-emerald-400 bg-emerald-950/40 border-emerald-900/60' : 'text-rose-400 bg-rose-950/40 border-rose-900/60'} border px-2 py-0.5 rounded text-[10px] font-bold">
+              ${isCompleted ? 'DONE' : 'MISSED'}
+            </span>
           </div>
-          <span class="text-emerald-400 font-bold text-xs">DONE</span>
-        </div>
-      `).join('');
+        `;
+      }).join('');
     }
 
-    async function commitMorningPrimer() {
-      const btn = document.getElementById('commitBtn');
-      const note = document.getElementById('mentalNote').value.trim();
+    async function commitEntry(isDone) {
+      const activeBtn = isDone ? document.getElementById('commitBtn') : document.getElementById('commitMissedBtn');
+      activeBtn.disabled = true;
+      activeBtn.innerText = "Recording...";
 
-      btn.disabled = true;
-      btn.innerText = "Recording Execution...";
+      const payload = {
+        stretch_date: todayStr,
+        completed: isDone,
+        intensity_focus: isDone ? selectedFocus : `Missed: ${selectedReason}`,
+        mental_note: isDone 
+          ? (document.getElementById('mentalNote').value.trim() || 'Mobiliti pagi selesai.') 
+          : (document.getElementById('missedNote').value.trim() || `Terlepas rutin: ${selectedReason}`)
+      };
 
       const { error } = await db
         .from('morning_stretching')
-        .upsert({
-          stretch_date: todayStr,
-          completed: true,
-          intensity_focus: selectedFocus,
-          mental_note: note || 'Tubuh disiapkan untuk hari ini.'
-        }, { onConflict: 'stretch_date' });
+        .upsert(payload, { onConflict: 'stretch_date' });
 
       if (error) {
         alert("Ralat simpan: " + error.message);
-        btn.disabled = false;
-        btn.innerText = "Commit: Stretching Selesai";
+        activeBtn.disabled = false;
+        activeBtn.innerText = isDone ? "Commit: Stretching Selesai" : "Log Hari Terlepas";
       } else {
         document.getElementById('mentalNote').value = "";
+        document.getElementById('missedNote').value = "";
         await loadTracker();
       }
     }
